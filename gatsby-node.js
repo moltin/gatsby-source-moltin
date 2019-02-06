@@ -9,10 +9,11 @@ exports.sourceNodes = async (
 
   const moltin = new createClient({ client_id })
 
-  const processProduct = ({ product, main_images }) => {
+  const processProduct = ({ product, main_images, categories }) => {
     const nodeId = createNodeId(`moltin-product-${product.id}`)
     const nodeContent = JSON.stringify(product)
 
+    let categoriesArray
     let mainImage
 
     if (product.relationships.main_image) {
@@ -29,8 +30,25 @@ exports.sourceNodes = async (
       mainImage = { href, ...rest }
     }
 
+    if (product.relationships.categories) {
+      categoriesArray = product.relationships.categories.data.map(
+        relationship => {
+          const category = categories.find(
+            category => category.id === relationship.id
+          )
+
+          if (category) {
+            return {
+              ...category
+            }
+          }
+        }
+      )
+    }
+
     const nodeData = {
       ...product,
+      categories: categoriesArray,
       mainImage,
       id: nodeId,
       parent: null,
@@ -73,7 +91,7 @@ exports.sourceNodes = async (
     createNode(await processCategory({ category }))
   )
   products.forEach(async product =>
-    createNode(await processProduct({ product, main_images }))
+    createNode(await processProduct({ product, main_images, categories }))
   )
 }
 
