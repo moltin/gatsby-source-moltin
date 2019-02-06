@@ -2,7 +2,7 @@ const { createClient } = require('@moltin/request')
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
 exports.sourceNodes = async (
-  { actions, createNodeId, createContentDigest },
+  { actions, createContentDigest },
   { client_id }
 ) => {
   const { createNode } = actions
@@ -10,7 +10,6 @@ exports.sourceNodes = async (
   const moltin = new createClient({ client_id })
 
   const processProduct = ({ product, main_images, categories }) => {
-    const nodeId = createNodeId(`moltin-product-${product.id}`)
     const nodeContent = JSON.stringify(product)
 
     let categoriesArray
@@ -48,9 +47,9 @@ exports.sourceNodes = async (
 
     const nodeData = {
       ...product,
+      id: product.id,
       categories: categoriesArray,
       mainImage,
-      id: nodeId,
       parent: null,
       children: [],
       internal: {
