@@ -45,12 +45,34 @@ exports.sourceNodes = async (
     return nodeData
   }
 
+  const processCategory = ({ category }) => {
+    const nodeContent = JSON.stringify(category)
+
+    const nodeData = {
+      ...category,
+      id: category.id,
+      parent: null,
+      children: [],
+      internal: {
+        type: `MoltinCategory`,
+        content: nodeContent,
+        contentDigest: createContentDigest(category)
+      }
+    }
+
+    return nodeData
+  }
+
+  const { data: categories } = await moltin.get('categories')
   const {
     data: products,
     included: { main_images }
   } = await moltin.get('products?include=main_image')
 
-  return products.forEach(async product =>
+  categories.forEach(async category =>
+    createNode(await processCategory({ category }))
+  )
+  products.forEach(async product =>
     createNode(await processProduct({ product, main_images }))
   )
 }
