@@ -60,14 +60,20 @@ exports.onCreateNode = async ({
 }) => {
   const { createNode } = actions
 
+  let mainImageNode
+
   if (node.internal.type === `MoltinProduct` && node.mainImageHref) {
-    const mainImageNode = await createRemoteFileNode({
-      url: node.mainImageHref,
-      store,
-      cache,
-      createNode,
-      createNodeId
-    })
+    try {
+      mainImageNode = await createRemoteFileNode({
+        url: node.mainImageHref,
+        store,
+        cache,
+        createNode,
+        createNodeId
+      })
+    } catch (e) {
+      console.error('gatsby-source-moltin: ERROR', e)
+    }
 
     if (mainImageNode) {
       node.mainImage___NODE = mainImageNode.id
