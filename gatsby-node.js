@@ -13,20 +13,16 @@ exports.sourceNodes = async (
     const nodeContent = JSON.stringify(product)
 
     let categoriesArray
-    let mainImage
+    let mainImageHref
 
     if (product.relationships.main_image) {
       const {
-        id,
-        links,
-        type,
-        link: { href },
-        ...rest
+        link: { href }
       } = main_images.find(
         main_image => main_image.id === product.relationships.main_image.data.id
       )
 
-      mainImage = { href, ...rest }
+      mainImageHref = href
     }
 
     if (product.relationships.categories) {
@@ -49,7 +45,7 @@ exports.sourceNodes = async (
       ...product,
       id: product.id,
       categories: categoriesArray,
-      mainImage,
+      mainImageHref,
       parent: null,
       children: [],
       internal: {
@@ -101,23 +97,25 @@ exports.onCreateNode = async ({
   cache,
   createNodeId
 }) => {
-  const { createNodeField, createNode } = actions
+  const { createNode } = actions
 
-  if (node.internal.type === `MoltinProduct` && node.mainImage) {
-    const mainImageNode = await createRemoteFileNode({
-      url: node.mainImage.href,
-      store,
-      cache,
-      createNode,
-      createNodeId
-    })
+  let mainImageNode
+
+  if (node.internal.type === `MoltinProduct` && node.mainImageHref) {
+    try {
+      mainImageNode = await createRemoteFileNode({
+        url: node.mainImageHref,
+        store,
+        cache,
+        createNode,
+        createNodeId
+      })
+    } catch (e) {
+      console.error('gatsby-source-moltin: ERROR', e)
+    }
 
     if (mainImageNode) {
-      createNodeField({
-        node,
-        name: `linkToMainImage___NODE`,
-        value: mainImageNode.id
-      })
+      node.mainImage___NODE = mainImageNode.id
     }
   }
 }
