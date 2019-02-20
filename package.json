@@ -12,5 +12,8 @@
   "contributors": [
     "Jamie Barton <hi@jamiebarton.co.uk>",
     "Jonathan Steele <jonathan@steele.pro> (https://steele.pro)"
-  ]
+  ],
+  "devDependencies": {
+    "semantic-release": "^15.13.3"
+  }
 }
