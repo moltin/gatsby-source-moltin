@@ -8,7 +8,7 @@
 // In your gatsby-config.js
 plugins: [
   {
-    resolve: `gatsby-source-moltin`,
+    resolve: `@moltin/gatsby-source-moltin`,
     options: {
       client_id: '...'
     },
