@@ -1,5 +1,5 @@
 {
-  "name": "gatsby-source-moltin",
+  "name": "@moltin/gatsby-source-moltin",
   "version": "0.1.0",
   "main": "index.js",
   "repository": "git@github.com:moltin/gatsby-source-moltin.git",
