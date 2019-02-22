@@ -82,12 +82,20 @@ exports.sourceNodes = async (
     included: { main_images }
   } = await moltin.get('products?include=main_image')
 
-  categories.forEach(async category =>
-    createNode(await processCategory({ category }))
-  )
-  products.forEach(async product =>
-    createNode(await processProduct({ product, main_images, categories }))
-  )
+  const createCategories = async ({ categories }) => {
+    categories.forEach(async category =>
+      createNode(await processCategory({ category }))
+    )
+  }
+
+  const createProducts = async ({ products, main_images, categories }) => {
+    products.forEach(async product =>
+      createNode(await processProduct({ product, main_images, categories }))
+    )
+  }
+
+  await createProducts({ products, main_images, categories })
+  await createCategories({ categories })
 }
 
 exports.onCreateNode = async ({
