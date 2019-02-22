@@ -95,13 +95,14 @@ exports.onCreateNode = async ({
   actions,
   store,
   cache,
-  createNodeId
+  createNodeId,
+  getNode
 }) => {
   const { createNode } = actions
 
-  let mainImageNode
-
   if (node.internal.type === `MoltinProduct` && node.mainImageHref) {
+    let mainImageNode
+
     try {
       mainImageNode = await createRemoteFileNode({
         url: node.mainImageHref,
@@ -117,5 +118,19 @@ exports.onCreateNode = async ({
     if (mainImageNode) {
       node.mainImage___NODE = mainImageNode.id
     }
+  }
+
+  if (
+    node.internal.type === `MoltinCategory` &&
+    node.relationships &&
+    node.relationships.products
+  ) {
+    node.products___NODE = await Promise.all(
+      node.relationships.products.data.map(async ({ id }) => {
+        const { id: productNode } = await getNode(id)
+
+        return productNode
+      })
+    )
   }
 }
