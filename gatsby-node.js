@@ -9,42 +9,68 @@ exports.sourceNodes = async (
 
   const moltin = new createClient({ client_id })
 
-  const processProduct = ({ product, main_images, categories }) => {
+  const processProduct = ({
+    product,
+    main_images,
+    categories,
+    collections
+  }) => {
     const nodeContent = JSON.stringify(product)
 
     let categoriesArray
+    let collectionsArray
     let mainImageHref
 
-    if (product.relationships.main_image) {
-      const {
-        link: { href }
-      } = main_images.find(
-        main_image => main_image.id === product.relationships.main_image.data.id
-      )
+    if (product.relationships) {
+      if (product.relationships.main_image) {
+        const {
+          link: { href }
+        } = main_images.find(
+          main_image =>
+            main_image.id === product.relationships.main_image.data.id
+        )
 
-      mainImageHref = href
-    }
+        mainImageHref = href
+      }
 
-    if (product.relationships.categories) {
-      categoriesArray = product.relationships.categories.data.map(
-        relationship => {
-          const category = categories.find(
-            category => category.id === relationship.id
-          )
+      if (product.relationships.categories) {
+        categoriesArray = product.relationships.categories.data.map(
+          relationship => {
+            const category = categories.find(
+              category => category.id === relationship.id
+            )
 
-          if (category) {
-            return {
-              ...category
+            if (category) {
+              return {
+                ...category
+              }
             }
           }
-        }
-      )
+        )
+      }
+
+      if (product.relationships.collections) {
+        collectionsArray = product.relationships.collections.data.map(
+          relationship => {
+            const collection = collections.find(
+              collection => collection.id === relationship.id
+            )
+
+            if (collection) {
+              return {
+                ...collection
+              }
+            }
+          }
+        )
+      }
     }
 
     const nodeData = {
       ...product,
       id: product.id,
       categories: categoriesArray,
+      collections: collectionsArray,
       mainImageHref,
       parent: null,
       children: [],
@@ -113,13 +139,20 @@ exports.sourceNodes = async (
     )
   }
 
-  const createProducts = async ({ products, main_images, categories }) => {
+  const createProducts = async ({
+    products,
+    main_images,
+    categories,
+    collections
+  }) => {
     products.forEach(async product =>
-      createNode(await processProduct({ product, main_images, categories }))
+      createNode(
+        await processProduct({ product, main_images, categories, collections })
+      )
     )
   }
 
-  await createProducts({ products, main_images, categories })
+  await createProducts({ products, main_images, categories, collections })
   await createCollections({ collections })
   await createCategories({ categories })
 }
