@@ -82,12 +82,20 @@ exports.sourceNodes = async (
     included: { main_images }
   } = await moltin.get('products?include=main_image')
 
-  categories.forEach(async category =>
-    createNode(await processCategory({ category }))
-  )
-  products.forEach(async product =>
-    createNode(await processProduct({ product, main_images, categories }))
-  )
+  const createCategories = async ({ categories }) => {
+    categories.forEach(async category =>
+      createNode(await processCategory({ category }))
+    )
+  }
+
+  const createProducts = async ({ products, main_images, categories }) => {
+    products.forEach(async product =>
+      createNode(await processProduct({ product, main_images, categories }))
+    )
+  }
+
+  await createProducts({ products, main_images, categories })
+  await createCategories({ categories })
 }
 
 exports.onCreateNode = async ({
@@ -95,13 +103,14 @@ exports.onCreateNode = async ({
   actions,
   store,
   cache,
-  createNodeId
+  createNodeId,
+  getNode
 }) => {
   const { createNode } = actions
 
-  let mainImageNode
-
   if (node.internal.type === `MoltinProduct` && node.mainImageHref) {
+    let mainImageNode
+
     try {
       mainImageNode = await createRemoteFileNode({
         url: node.mainImageHref,
@@ -117,5 +126,19 @@ exports.onCreateNode = async ({
     if (mainImageNode) {
       node.mainImage___NODE = mainImageNode.id
     }
+  }
+
+  if (
+    node.internal.type === `MoltinCategory` &&
+    node.relationships &&
+    node.relationships.products
+  ) {
+    node.products___NODE = await Promise.all(
+      node.relationships.products.data.map(async ({ id }) => {
+        const { id: productNode } = await getNode(id)
+
+        return productNode
+      })
+    )
   }
 }
