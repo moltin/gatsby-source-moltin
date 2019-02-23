@@ -155,7 +155,7 @@ exports.onCreateNode = async ({
   }
 
   if (
-    node.internal.type === `MoltinCategory` &&
+    [`MoltinCategory`, `MoltinCollection`].includes(node.internal.type) &&
     node.relationships &&
     node.relationships.products
   ) {
