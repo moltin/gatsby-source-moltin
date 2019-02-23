@@ -76,7 +76,26 @@ exports.sourceNodes = async (
     return nodeData
   }
 
+  const processCollection = ({ collection }) => {
+    const nodeContent = JSON.stringify(collection)
+
+    const nodeData = {
+      ...collection,
+      id: collection.id,
+      parent: null,
+      children: [],
+      internal: {
+        type: `MoltinCollection`,
+        content: nodeContent,
+        contentDigest: createContentDigest(collection)
+      }
+    }
+
+    return nodeData
+  }
+
   const { data: categories } = await moltin.get('categories')
+  const { data: collections } = await moltin.get('collections')
   const {
     data: products,
     included: { main_images }
@@ -88,6 +107,12 @@ exports.sourceNodes = async (
     )
   }
 
+  const createCollections = async ({ collections }) => {
+    collections.forEach(async collection =>
+      createNode(await processCollection({ collection }))
+    )
+  }
+
   const createProducts = async ({ products, main_images, categories }) => {
     products.forEach(async product =>
       createNode(await processProduct({ product, main_images, categories }))
@@ -95,6 +120,7 @@ exports.sourceNodes = async (
   }
 
   await createProducts({ products, main_images, categories })
+  await createCollections({ collections })
   await createCategories({ categories })
 }
 
