@@ -10,7 +10,10 @@ plugins: [
   {
     resolve: `@moltin/gatsby-source-moltin`,
     options: {
-      client_id: '...'
+      client_id: '...',
+      flows: {
+        product: ['flow', 'fields']
+      }
     },
   },
 ],

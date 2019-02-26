@@ -3,14 +3,19 @@ const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
 exports.sourceNodes = async (
   { actions, createContentDigest },
-  { client_id }
+  { client_id, flows: { product: productFlows = {} } }
 ) => {
   const { createNode } = actions
 
-  const moltin = new createClient({ client_id })
+  const moltin = new createClient({
+    client_id,
+    application: 'gatsby-source-moltin'
+  })
 
   const processProduct = ({ product, main_images, categories }) => {
     const nodeContent = JSON.stringify(product)
+
+    console.log(nodeContent)
 
     let categoriesArray
     let mainImageHref
@@ -41,7 +46,16 @@ exports.sourceNodes = async (
       )
     }
 
+    const flows = productFlows.reduce(
+      (o, key) => ({
+        ...o,
+        [key]: ''
+      }),
+      {}
+    )
+
     const nodeData = {
+      ...flows,
       ...product,
       id: product.id,
       categories: categoriesArray,
