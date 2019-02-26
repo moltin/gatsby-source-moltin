@@ -15,8 +15,6 @@ exports.sourceNodes = async (
   const processProduct = ({ product, main_images, categories }) => {
     const nodeContent = JSON.stringify(product)
 
-    console.log(nodeContent)
-
     let categoriesArray
     let mainImageHref
 
