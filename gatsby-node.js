@@ -192,12 +192,22 @@ exports.onCreateNode = async ({
     node.relationships &&
     node.relationships.products
   ) {
-    node.products___NODE = await Promise.all(
-      node.relationships.products.data.map(async ({ id }) => {
-        const { id: productNode } = await getNode(id)
+    const getProductNodes = async () => {
+      const productIds = node.relationships.products.data.map(
+        product => product.id
+      )
 
-        return productNode
+      let productNodes = []
+
+      await productIds.forEach(async productId => {
+        const productNode = await getNode(productId)
+
+        if (productNode) productNodes.push(productNode.id)
       })
-    )
+
+      return productNodes
+    }
+
+    node.products___NODE = await getProductNodes()
   }
 }
