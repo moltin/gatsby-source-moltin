@@ -124,7 +124,7 @@ exports.sourceNodes = async (
   const { data: collections } = await moltin.get('collections')
   const {
     data: products,
-    included: { main_images }
+    included: { main_images = {} } = {}
   } = await moltin.get('products?include=main_image')
 
   const createCategories = async ({ categories }) => {
