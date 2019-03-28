@@ -226,10 +226,6 @@ exports.onCreateNode = async ({
         )
       }
 
-      console.log('Nodes')
-      console.log(imageNodes)
-      console.log(node.mainImageHref)
-
       const imageFetchingPromises = imageNodes.map(async fileNode => {
         let imageNode
 
