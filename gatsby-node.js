@@ -218,8 +218,19 @@ exports.onCreateNode = async ({
   if (node.internal.type === `MoltinProduct` && node.files) {
     const getFileNodes = async () => {
       const fileIds = []
+      let imageNodes = node.files
 
-      const imageFetchingPromises = node.files.map(async fileNode => {
+      if (node.mainImageHref) {
+        imageNodes = imageNodes.filter(
+          fileNode => node.mainImageHref !== fileNode.href
+        )
+      }
+
+      console.log('Nodes')
+      console.log(imageNodes)
+      console.log(node.mainImageHref)
+
+      const imageFetchingPromises = imageNodes.map(async fileNode => {
         let imageNode
 
         try {
