@@ -13,7 +13,7 @@
   "author": "Moltin (https://moltin.com)",
   "license": "MIT",
   "dependencies": {
-    "@moltin/request": "^1.4.3",
+    "@moltin/request": "^2.0.0",
     "gatsby-source-filesystem": "^2.0.20"
   },
   "contributors": [
