@@ -15,6 +15,7 @@ exports.sourceNodes = async (
     categories,
     collections,
     files
+    // variations
   }) => {
     const nodeContent = JSON.stringify(product)
 
@@ -22,6 +23,7 @@ exports.sourceNodes = async (
     let collectionsArray
     let filesArray
     let mainImageHref
+    // let variationsArray
 
     if (product.relationships) {
       if (product.relationships.main_image) {
@@ -78,6 +80,24 @@ exports.sourceNodes = async (
           }
         })
       }
+
+      // if (product.relationships.variations) {
+      //   console.log(product.relationships.variations)
+
+      //   variationsArray = product.relationships.variations.data.map(
+      //     relationship => {
+      //       const variation = variations.find(
+      //         variation => variation.id === relationship.id
+      //       )
+
+      //       if (variation) {
+      //         return {
+      //           ...variation
+      //         }
+      //       }
+      //     }
+      //   )
+      // }
     }
 
     const nodeData = {
@@ -87,6 +107,25 @@ exports.sourceNodes = async (
       collections: collectionsArray,
       files: filesArray,
       mainImageHref,
+      // variants: variationsArray,
+      // variants: [
+      //   {
+      //     id: '123',
+      //     name: 'Colour',
+      //     options: [
+      //       {
+      //         id: '1234',
+      //         name: 'Black',
+      //         description: 'The black option'
+      //       },
+      //       {
+      //         id: '1234',
+      //         name: 'White',
+      //         description: 'The white option'
+      //       }
+      //     ]
+      //   }
+      // ],
       parent: null,
       children: [],
       internal: {
@@ -135,12 +174,31 @@ exports.sourceNodes = async (
     return nodeData
   }
 
+  const processVariation = ({ variation }) => {
+    const nodeContent = JSON.stringify(variation)
+
+    const nodeData = {
+      ...variation,
+      id: variation.id,
+      parent: null,
+      children: [],
+      internal: {
+        type: `MoltinVariation`,
+        content: nodeContent,
+        contentDigest: createContentDigest(variation)
+      }
+    }
+
+    return nodeData
+  }
+
   const { data: categories } = await moltin.get('categories')
   const { data: collections } = await moltin.get('collections')
   const {
     data: products,
     included: { main_images = {}, files = [] } = {}
   } = await moltin.get('products?include=main_image,files')
+  const { data: variations } = await moltin.get('brands')
 
   const createCategories = async ({ categories }) => {
     categories.forEach(async category =>
@@ -154,12 +212,19 @@ exports.sourceNodes = async (
     )
   }
 
+  // const createVariations = async ({ variations }) => {
+  //   variations.forEach(async variation =>
+  //     createNode(await processVariation({ variation }))
+  //   )
+  // }
+
   const createProducts = async ({
     products,
     main_images,
     categories,
     collections,
     files
+    // variations
   }) => {
     products.forEach(async product =>
       createNode(
@@ -169,6 +234,7 @@ exports.sourceNodes = async (
           categories,
           collections,
           files
+          // variations
         })
       )
     )
@@ -180,9 +246,11 @@ exports.sourceNodes = async (
     categories,
     collections,
     files
+    // variations
   })
   await createCollections({ collections })
   await createCategories({ categories })
+  // await createVariations({ variations })
 }
 
 exports.onCreateNode = async ({
