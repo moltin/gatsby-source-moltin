@@ -3,19 +3,23 @@ const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
 exports.sourceNodes = async (
   { actions, createContentDigest },
-  { client_id }
+  { client_id, client_secret }
 ) => {
   const { createNode } = actions
 
-  const moltin = new MoltinClient({ client_id })
+  const moltin = new MoltinClient({
+    client_id,
+    client_secret,
+    application: 'gatsby-source-moltin'
+  })
 
   const processProduct = ({
     product,
     main_images,
     categories,
     collections,
-    files
-    // variations
+    files,
+    variations
   }) => {
     const nodeContent = JSON.stringify(product)
 
@@ -23,7 +27,7 @@ exports.sourceNodes = async (
     let collectionsArray
     let filesArray
     let mainImageHref
-    // let variationsArray
+    let variationsArray
 
     if (product.relationships) {
       if (product.relationships.main_image) {
@@ -81,23 +85,23 @@ exports.sourceNodes = async (
         })
       }
 
-      // if (product.relationships.variations) {
-      //   console.log(product.relationships.variations)
+      if (product.relationships.variations) {
+        console.log(product.relationships.variations)
 
-      //   variationsArray = product.relationships.variations.data.map(
-      //     relationship => {
-      //       const variation = variations.find(
-      //         variation => variation.id === relationship.id
-      //       )
+        variationsArray = product.relationships.variations.data.map(
+          relationship => {
+            const variation = variations.find(
+              variation => variation.id === relationship.id
+            )
 
-      //       if (variation) {
-      //         return {
-      //           ...variation
-      //         }
-      //       }
-      //     }
-      //   )
-      // }
+            if (variation) {
+              return {
+                ...variation
+              }
+            }
+          }
+        )
+      }
     }
 
     const nodeData = {
@@ -107,7 +111,7 @@ exports.sourceNodes = async (
       collections: collectionsArray,
       files: filesArray,
       mainImageHref,
-      // variants: variationsArray,
+      variants: variationsArray,
       // variants: [
       //   {
       //     id: '123',
@@ -198,7 +202,7 @@ exports.sourceNodes = async (
     data: products,
     included: { main_images = {}, files = [] } = {}
   } = await moltin.get('products?include=main_image,files')
-  const { data: variations } = await moltin.get('brands')
+  const { data: variations } = await moltin.get('variations')
 
   const createCategories = async ({ categories }) => {
     categories.forEach(async category =>
@@ -212,19 +216,19 @@ exports.sourceNodes = async (
     )
   }
 
-  // const createVariations = async ({ variations }) => {
-  //   variations.forEach(async variation =>
-  //     createNode(await processVariation({ variation }))
-  //   )
-  // }
+  const createVariations = async ({ variations }) => {
+    variations.forEach(async variation =>
+      createNode(await processVariation({ variation }))
+    )
+  }
 
   const createProducts = async ({
     products,
     main_images,
     categories,
     collections,
-    files
-    // variations
+    files,
+    variations
   }) => {
     products.forEach(async product =>
       createNode(
@@ -233,8 +237,8 @@ exports.sourceNodes = async (
           main_images,
           categories,
           collections,
-          files
-          // variations
+          files,
+          variations
         })
       )
     )
@@ -245,12 +249,12 @@ exports.sourceNodes = async (
     main_images,
     categories,
     collections,
-    files
-    // variations
+    files,
+    variations
   })
   await createCollections({ collections })
   await createCategories({ categories })
-  // await createVariations({ variations })
+  await createVariations({ variations })
 }
 
 exports.onCreateNode = async ({
