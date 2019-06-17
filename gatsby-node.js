@@ -112,24 +112,6 @@ exports.sourceNodes = async (
       files: filesArray,
       mainImageHref,
       variants: variationsArray,
-      // variants: [
-      //   {
-      //     id: '123',
-      //     name: 'Colour',
-      //     options: [
-      //       {
-      //         id: '1234',
-      //         name: 'Black',
-      //         description: 'The black option'
-      //       },
-      //       {
-      //         id: '1234',
-      //         name: 'White',
-      //         description: 'The white option'
-      //       }
-      //     ]
-      //   }
-      // ],
       parent: null,
       children: [],
       internal: {
