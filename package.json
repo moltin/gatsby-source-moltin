@@ -22,5 +22,8 @@
   ],
   "devDependencies": {
     "semantic-release": "^15.13.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
