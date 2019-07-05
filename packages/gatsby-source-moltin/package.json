@@ -1,0 +1,26 @@
+{
+  "name": "@moltin/gatsby-source-moltin",
+  "version": "0.1.0",
+  "description": "Gatsby source plugin for building Moltin powered eCommerce websites",
+  "main": "index.js",
+  "repository": "git@github.com:moltin/gatsby-source-moltin.git",
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "gatsby-source-plugin",
+    "moltin"
+  ],
+  "author": "Moltin (https://moltin.com)",
+  "license": "MIT",
+  "dependencies": {
+    "@moltin/request": "^2.0.0",
+    "gatsby-source-filesystem": "^2.0.20"
+  },
+  "contributors": [
+    "Jamie Barton <hi@jamiebarton.co.uk>",
+    "Jonathan Steele <jonathan@steele.pro> (https://steele.pro)"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
