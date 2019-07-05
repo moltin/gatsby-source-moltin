@@ -14,12 +14,14 @@ exports.sourceNodes = async (
     main_images,
     categories,
     collections,
+    brands,
     files
   }) => {
     const nodeContent = JSON.stringify(product)
 
     let categoriesArray
     let collectionsArray
+    let brandsArray
     let filesArray
     let mainImageHref
 
@@ -67,6 +69,18 @@ exports.sourceNodes = async (
         )
       }
 
+      if (product.relationships.brands) {
+        brandsArray = product.relationships.brands.data.map(relationship => {
+          const brand = brands.find(brand => brand.id === relationship.id)
+
+          if (brand) {
+            return {
+              ...brand
+            }
+          }
+        })
+      }
+
       if (product.relationships.files) {
         filesArray = product.relationships.files.data.map(relationship => {
           const file = files.find(file => file.id === relationship.id)
@@ -83,6 +97,7 @@ exports.sourceNodes = async (
     const nodeData = {
       ...product,
       id: product.id,
+      brands: brandsArray,
       categories: categoriesArray,
       collections: collectionsArray,
       files: filesArray,
@@ -135,6 +150,25 @@ exports.sourceNodes = async (
     return nodeData
   }
 
+  const processBrand = ({ brand }) => {
+    const nodeContent = JSON.stringify(brand)
+
+    const nodeData = {
+      ...brand,
+      id: brand.id,
+      parent: null,
+      children: [],
+      internal: {
+        type: `MoltinBrand`,
+        content: nodeContent,
+        contentDigest: createContentDigest(brand)
+      }
+    }
+
+    return nodeData
+  }
+
+  const { data: brands } = await moltin.get('brands')
   const { data: categories } = await moltin.get('categories')
   const { data: collections } = await moltin.get('collections')
   const {
@@ -154,11 +188,16 @@ exports.sourceNodes = async (
     )
   }
 
+  const createBrands = async ({ brands }) => {
+    brands.forEach(async brand => createNode(await processBrand({ brand })))
+  }
+
   const createProducts = async ({
     products,
     main_images,
     categories,
     collections,
+    brands,
     files
   }) => {
     products.forEach(async product =>
@@ -168,6 +207,7 @@ exports.sourceNodes = async (
           main_images,
           categories,
           collections,
+          brands,
           files
         })
       )
@@ -179,10 +219,12 @@ exports.sourceNodes = async (
     main_images,
     categories,
     collections,
+    brands,
     files
   })
   await createCollections({ collections })
   await createCategories({ categories })
+  await createBrands({ brands })
 }
 
 exports.onCreateNode = async ({
@@ -253,7 +295,9 @@ exports.onCreateNode = async ({
   }
 
   if (
-    [`MoltinCategory`, `MoltinCollection`].includes(node.internal.type) &&
+    [`MoltinBrand`, `MoltinCategory`, `MoltinCollection`].includes(
+      node.internal.type
+    ) &&
     node.relationships &&
     node.relationships.products
   ) {
