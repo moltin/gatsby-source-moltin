@@ -1,13 +1,18 @@
 const { MoltinClient } = require('@moltin/request')
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
+const { name: application } = require('./package')
+
 exports.sourceNodes = async (
   { actions, createContentDigest },
   { client_id }
 ) => {
   const { createNode } = actions
 
-  const moltin = new MoltinClient({ client_id })
+  const moltin = new MoltinClient({
+    client_id,
+    application
+  })
 
   const processProduct = ({
     product,
