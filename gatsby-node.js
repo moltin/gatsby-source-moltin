@@ -176,10 +176,36 @@ exports.sourceNodes = async (
   const { data: brands } = await moltin.get('brands')
   const { data: categories } = await moltin.get('categories')
   const { data: collections } = await moltin.get('collections')
+
+  const getPaginatedProducts = async (
+    products = [],
+    search = `?include=main_image,files`
+  ) => {
+    try {
+      const {
+        data,
+        links: { next }
+      } = await moltin.get(`products${search}`)
+
+      const retrivedProducts = products.concat(data)
+
+      if (next) {
+        const { search } = new URL(next)
+        getPaginatedProducts(retrivedProducts, search)
+      }
+
+      return { data: retrivedProducts }
+    } catch (error) {
+      console.error('gatsby-source-moltin: ERROR', error)
+    }
+  }
+
+  console.log(await getPaginatedProducts())
+
   const {
-    data: products,
-    included: { main_images = {}, files = [] } = {}
-  } = await moltin.get('products?include=main_image,files')
+    data: products
+    // included: { main_images = {}, files = [] } = {}
+  } = await getPaginatedProducts()
 
   const createCategories = async ({ categories }) => {
     categories.forEach(async category =>
