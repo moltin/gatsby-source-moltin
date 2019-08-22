@@ -1,5 +1,6 @@
 const { MoltinClient } = require('@moltin/request')
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
+const merge = require('deepmerge')
 
 const { name: application } = require('./package')
 
@@ -178,33 +179,32 @@ exports.sourceNodes = async (
   const { data: collections } = await moltin.get('collections')
 
   const getPaginatedProducts = async (
-    products = [],
+    data = {},
     search = `?include=main_image,files`
   ) => {
     try {
+      const response = await moltin.get(`products${search}`)
       const {
         data,
         links: { next }
-      } = await moltin.get(`products${search}`)
+      } = response
 
-      const retrivedProducts = products.concat(data)
+      const merged = merge(data, response)
 
       if (next) {
         const { search } = new URL(next)
-        getPaginatedProducts(retrivedProducts, search)
+        getPaginatedProducts(merged, search)
       }
 
-      return { data: retrivedProducts }
+      return merged
     } catch (error) {
       console.error('gatsby-source-moltin: ERROR', error)
     }
   }
 
-  console.log(await getPaginatedProducts())
-
   const {
-    data: products
-    // included: { main_images = {}, files = [] } = {}
+    data: products,
+    included: { main_images = {}, files = [] } = {}
   } = await getPaginatedProducts()
 
   const createCategories = async ({ categories }) => {
