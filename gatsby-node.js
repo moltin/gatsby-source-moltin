@@ -33,14 +33,18 @@ exports.sourceNodes = async (
 
     if (product.relationships) {
       if (product.relationships.main_image) {
-        const {
-          link: { href }
-        } = main_images.find(
+        const image = main_images.find(
           main_image =>
             main_image.id === product.relationships.main_image.data.id
         )
 
-        mainImageHref = href
+        if (image && image.link) {
+          const {
+            link: { href }
+          } = image
+
+          mainImageHref = href
+        }
       }
 
       if (product.relationships.categories) {
