@@ -178,16 +178,9 @@ exports.sourceNodes = async (
     return nodeData
   }
 
-  const { data: brands } = await moltin.get('brands')
-  const { data: categories } = await moltin.get('categories')
-  const { data: collections } = await moltin.get('collections')
-
-  const getPaginatedProducts = async (
-    data = {},
-    search = `?include=main_image,files`
-  ) => {
+  const getPaginatedResource = async (resource, data = {}, search = '') => {
     try {
-      const response = await moltin.get(`products${search}`)
+      const response = await moltin.get(`${resource}${search}`)
       const {
         data,
         links: { next }
@@ -197,7 +190,7 @@ exports.sourceNodes = async (
 
       if (next) {
         const { search } = new URL(next)
-        getPaginatedProducts(merged, search)
+        getPaginatedResource(resource, merged, search)
       }
 
       return merged
@@ -206,10 +199,13 @@ exports.sourceNodes = async (
     }
   }
 
+  const { data: brands } = await moltin.get('brands')
+  const { data: categories } = await getPaginatedResource('categories')
+  const { data: collections } = await getPaginatedResource('collections')
   const {
     data: products,
     included: { main_images = {}, files = [] } = {}
-  } = await getPaginatedProducts()
+  } = await getPaginatedResource('products', {}, `?include=main_image,files`)
 
   const createCategories = async ({ categories }) => {
     categories.forEach(async category =>
