@@ -22,7 +22,7 @@
     "Jonathan Steele <jonathan@steele.pro> (https://steele.pro)"
   ],
   "devDependencies": {
-    "semantic-release": "15.13.21"
+    "semantic-release": "15.13.24"
   },
   "publishConfig": {
     "access": "public"
