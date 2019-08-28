@@ -181,6 +181,10 @@ exports.sourceNodes = async (
   const getPaginatedResource = async (resource, data = {}, search = '') => {
     try {
       const response = await moltin.get(`${resource}${search}`)
+
+      if (response.data === undefined || response.data.length === 0)
+        return response
+
       const {
         data,
         links: { next }
