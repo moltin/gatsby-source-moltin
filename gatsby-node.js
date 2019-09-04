@@ -186,7 +186,6 @@ exports.sourceNodes = async (
         return response
 
       const {
-        data,
         links: { next }
       } = response
 
