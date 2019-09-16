@@ -189,7 +189,7 @@ exports.sourceNodes = async (
         links: { next }
       } = response
 
-      var merged = merge(data, response)
+      let merged = merge(data, response)
 
       if (next) {
         const { search } = new URL(next)
