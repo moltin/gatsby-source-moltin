@@ -189,11 +189,11 @@ exports.sourceNodes = async (
         links: { next }
       } = response
 
-      const merged = merge(data, response)
+      let merged = merge(data, response)
 
       if (next) {
         const { search } = new URL(next)
-        getPaginatedResource(resource, merged, search)
+        merged = getPaginatedResource(resource, merged, search)
       }
 
       return merged
