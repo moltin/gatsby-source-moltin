@@ -223,13 +223,17 @@ exports.sourceNodes = async (
     }
   }
 
-  const { data: brands } = await moltin.get('brands')
-  const { data: categories } = await getPaginatedResource('categories')
-  const { data: collections } = await getPaginatedResource('collections')
-  const {
-    data: products,
-    included: { main_images = {}, files = [] } = {}
-  } = await getPaginatedResource('products', {}, `?include=main_image,files`)
+  const [
+    { data: brands },
+    { data: categories },
+    { data: collections },
+    { data: products, included: { main_images = {}, files = [] } = {} }
+  ] = await Promise.all([
+    moltin.get('brands'),
+    getPaginatedResource('categories'),
+    getPaginatedResource('collections'),
+    getPaginatedResource('products', {}, `?include=main_image,files`)
+  ])
 
   const createCategories = async ({ categories }) => {
     categories.forEach(async category =>
@@ -247,39 +251,30 @@ exports.sourceNodes = async (
     brands.forEach(async brand => createNode(await processBrand({ brand })))
   }
 
-  const createProducts = async ({
-    products,
-    main_images,
-    categories,
-    collections,
-    brands,
-    files
-  }) => {
+  const createProducts = async ({ products, ...rest }) => {
     products.forEach(async product =>
       createNode(
         await processProduct({
           product,
-          main_images,
-          categories,
-          collections,
-          brands,
-          files
+          ...rest
         })
       )
     )
   }
 
-  await createProducts({
-    products,
-    main_images,
-    categories,
-    collections,
-    brands,
-    files
-  })
-  await createCollections({ collections })
-  await createCategories({ categories })
-  await createBrands({ brands })
+  await Promise.all([
+    createProducts({
+      products,
+      main_images,
+      categories,
+      collections,
+      brands,
+      files
+    }),
+    createCollections({ collections }),
+    createCategories({ categories }),
+    createBrands({ brands })
+  ])
 }
 
 exports.onCreateNode = async ({
