@@ -30,6 +30,8 @@ exports.sourceNodes = async (
     let brandsArray
     let filesArray
     let mainImageHref
+    let parentId
+    let childrenArray
 
     if (product.relationships) {
       if (product.relationships.main_image) {
@@ -102,6 +104,14 @@ exports.sourceNodes = async (
           }
         })
       }
+
+      if (product.relationships.parent) {
+        parentId = product.relationships.parent.data.id
+      }
+
+      if (product.relationships.children) {
+        childrenArray = product.relationships.children.data.map((rel) => rel.id)
+      }
     }
 
     const nodeData = {
@@ -112,8 +122,8 @@ exports.sourceNodes = async (
       collections: collectionsArray,
       files: filesArray,
       mainImageHref,
-      parent: null,
-      children: [],
+      parent: parentId || null,
+      children: childrenArray || [],
       internal: {
         type: `MoltinProduct`,
         content: nodeContent,
@@ -127,11 +137,22 @@ exports.sourceNodes = async (
   const processCategory = ({ category }) => {
     const nodeContent = JSON.stringify(category)
 
+    let parentId
+    let childrenArray
+
+    if (category.relationships) {
+      if (category.relationships.parent) {
+        parentId = category.relationships.parent.data[0].id
+      }
+      if (category.relationships.children) {
+        childrenArray = category.relationships.children.data.map((rel) => rel.id)
+      }
+    }
     const nodeData = {
       ...category,
       id: category.id,
-      parent: null,
-      children: [],
+      parent: parentId || null,
+      children: childrenArray || [],
       internal: {
         type: `MoltinCategory`,
         content: nodeContent,
