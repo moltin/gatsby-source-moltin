@@ -113,8 +113,13 @@ exports.sourceNodes = async (
         childrenArray = product.relationships.children.data.map((rel) => rel.id)
       }
     }
-
-    const nodeData = {
+  
+    if (product.meta.variation_matrix) {
+      const { variation_matrix } = product.meta;
+      product.meta.variation_matrix = JSON.stringify(variation_matrix);
+    }
+    
+      const nodeData = {
       ...product,
       id: product.id,
       brands: brandsArray,
@@ -222,14 +227,29 @@ exports.sourceNodes = async (
       console.error('gatsby-source-moltin: ERROR', error)
     }
   }
+  
+  const getProductsById = async (productsArray = []) => {
+    let products = [];
+    try {
+      const productsRequests = productsArray.map(product =>
+        moltin.get(`products/${product.id}`)
+      )
+      const productsData = await Promise.all(productsRequests);
+      products = productsData.map(({ data }) => data);
+    } catch (error) {
+      console.error('gatsby-source-moltin: ERROR', error)
+    }
+    return products
+  }
 
   const { data: brands } = await moltin.get('brands')
   const { data: categories } = await getPaginatedResource('categories')
   const { data: collections } = await getPaginatedResource('collections')
   const {
-    data: products,
+    data: productsListing,
     included: { main_images = {}, files = [] } = {}
   } = await getPaginatedResource('products', {}, `?include=main_image,files`)
+  const products = await getProductsById(productsListing);
 
   const createCategories = async ({ categories }) => {
     categories.forEach(async category =>
