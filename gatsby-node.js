@@ -12,7 +12,7 @@ exports.sourceNodes = async (
 
   const moltin = new MoltinClient({
     client_id,
-    application
+    application,
   })
 
   const processProduct = ({
@@ -21,7 +21,7 @@ exports.sourceNodes = async (
     categories,
     collections,
     brands,
-    files
+    files,
   }) => {
     const nodeContent = JSON.stringify(product)
 
@@ -36,13 +36,13 @@ exports.sourceNodes = async (
     if (product.relationships) {
       if (product.relationships.main_image) {
         const image = main_images.find(
-          main_image =>
+          (main_image) =>
             main_image.id === product.relationships.main_image.data.id
         )
 
         if (image && image.link) {
           const {
-            link: { href }
+            link: { href },
           } = image
 
           mainImageHref = href
@@ -51,14 +51,14 @@ exports.sourceNodes = async (
 
       if (product.relationships.categories) {
         categoriesArray = product.relationships.categories.data.map(
-          relationship => {
+          (relationship) => {
             const category = categories.find(
-              category => category.id === relationship.id
+              (category) => category.id === relationship.id
             )
 
             if (category) {
               return {
-                ...category
+                ...category,
               }
             }
           }
@@ -67,14 +67,14 @@ exports.sourceNodes = async (
 
       if (product.relationships.collections) {
         collectionsArray = product.relationships.collections.data.map(
-          relationship => {
+          (relationship) => {
             const collection = collections.find(
-              collection => collection.id === relationship.id
+              (collection) => collection.id === relationship.id
             )
 
             if (collection) {
               return {
-                ...collection
+                ...collection,
               }
             }
           }
@@ -82,24 +82,24 @@ exports.sourceNodes = async (
       }
 
       if (product.relationships.brands) {
-        brandsArray = product.relationships.brands.data.map(relationship => {
-          const brand = brands.find(brand => brand.id === relationship.id)
+        brandsArray = product.relationships.brands.data.map((relationship) => {
+          const brand = brands.find((brand) => brand.id === relationship.id)
 
           if (brand) {
             return {
-              ...brand
+              ...brand,
             }
           }
         })
       }
 
       if (product.relationships.files) {
-        filesArray = product.relationships.files.data.map(relationship => {
-          const file = files.find(file => file.id === relationship.id)
+        filesArray = product.relationships.files.data.map((relationship) => {
+          const file = files.find((file) => file.id === relationship.id)
           if (file) {
             return {
               id: file.id,
-              href: file.link.href
+              href: file.link.href,
             }
           }
         })
@@ -112,6 +112,11 @@ exports.sourceNodes = async (
       if (product.relationships.children) {
         childrenArray = product.relationships.children.data.map((rel) => rel.id)
       }
+    }
+
+    if (product.meta.variation_matrix) {
+      const { variation_matrix } = product.meta
+      product.meta.variation_matrix = JSON.stringify(variation_matrix)
     }
 
     const nodeData = {
@@ -127,8 +132,8 @@ exports.sourceNodes = async (
       internal: {
         type: `MoltinProduct`,
         content: nodeContent,
-        contentDigest: createContentDigest(product)
-      }
+        contentDigest: createContentDigest(product),
+      },
     }
 
     return nodeData
@@ -145,7 +150,9 @@ exports.sourceNodes = async (
         parentId = category.relationships.parent.data[0].id
       }
       if (category.relationships.children) {
-        childrenArray = category.relationships.children.data.map((rel) => rel.id)
+        childrenArray = category.relationships.children.data.map(
+          (rel) => rel.id
+        )
       }
     }
     const nodeData = {
@@ -156,8 +163,8 @@ exports.sourceNodes = async (
       internal: {
         type: `MoltinCategory`,
         content: nodeContent,
-        contentDigest: createContentDigest(category)
-      }
+        contentDigest: createContentDigest(category),
+      },
     }
 
     return nodeData
@@ -174,8 +181,8 @@ exports.sourceNodes = async (
       internal: {
         type: `MoltinCollection`,
         content: nodeContent,
-        contentDigest: createContentDigest(collection)
-      }
+        contentDigest: createContentDigest(collection),
+      },
     }
 
     return nodeData
@@ -192,8 +199,8 @@ exports.sourceNodes = async (
       internal: {
         type: `MoltinBrand`,
         content: nodeContent,
-        contentDigest: createContentDigest(brand)
-      }
+        contentDigest: createContentDigest(brand),
+      },
     }
 
     return nodeData
@@ -207,7 +214,7 @@ exports.sourceNodes = async (
         return response
 
       const {
-        links: { next }
+        links: { next },
       } = response
 
       let merged = merge(data, response)
@@ -223,28 +230,42 @@ exports.sourceNodes = async (
     }
   }
 
+  const getProductsById = async (productsArray = []) => {
+    let products = []
+    try {
+      for (const product of productsArray) {
+        const response = await moltin.get(`products/${product.id}`)
+        products.push(response.data)
+      }
+    } catch (error) {
+      console.error('gatsby-source-moltin: ERROR', error)
+    }
+    return products
+  }
+
   const { data: brands } = await moltin.get('brands')
   const { data: categories } = await getPaginatedResource('categories')
   const { data: collections } = await getPaginatedResource('collections')
   const {
-    data: products,
-    included: { main_images = {}, files = [] } = {}
+    data: productsListing,
+    included: { main_images = {}, files = [] } = {},
   } = await getPaginatedResource('products', {}, `?include=main_image,files`)
+  const products = await getProductsById(productsListing)
 
   const createCategories = async ({ categories }) => {
-    categories.forEach(async category =>
+    categories.forEach(async (category) =>
       createNode(await processCategory({ category }))
     )
   }
 
   const createCollections = async ({ collections }) => {
-    collections.forEach(async collection =>
+    collections.forEach(async (collection) =>
       createNode(await processCollection({ collection }))
     )
   }
 
   const createBrands = async ({ brands }) => {
-    brands.forEach(async brand => createNode(await processBrand({ brand })))
+    brands.forEach(async (brand) => createNode(await processBrand({ brand })))
   }
 
   const createProducts = async ({
@@ -253,9 +274,9 @@ exports.sourceNodes = async (
     categories,
     collections,
     brands,
-    files
+    files,
   }) => {
-    products.forEach(async product =>
+    products.forEach(async (product) =>
       createNode(
         await processProduct({
           product,
@@ -263,7 +284,7 @@ exports.sourceNodes = async (
           categories,
           collections,
           brands,
-          files
+          files,
         })
       )
     )
@@ -275,7 +296,7 @@ exports.sourceNodes = async (
     categories,
     collections,
     brands,
-    files
+    files,
   })
   await createCollections({ collections })
   await createCategories({ categories })
@@ -288,7 +309,7 @@ exports.onCreateNode = async ({
   store,
   cache,
   createNodeId,
-  getNode
+  getNode,
 }) => {
   const { createNode } = actions
 
@@ -301,7 +322,7 @@ exports.onCreateNode = async ({
         store,
         cache,
         createNode,
-        createNodeId
+        createNodeId,
       })
     } catch (e) {
       console.error('gatsby-source-moltin: ERROR', e)
@@ -319,11 +340,11 @@ exports.onCreateNode = async ({
 
       if (node.mainImageHref) {
         imageNodes = imageNodes.filter(
-          fileNode => node.mainImageHref !== fileNode.href
+          (fileNode) => node.mainImageHref !== fileNode.href
         )
       }
 
-      const imageFetchingPromises = imageNodes.map(async fileNode => {
+      const imageFetchingPromises = imageNodes.map(async (fileNode) => {
         let imageNode
 
         try {
@@ -332,7 +353,7 @@ exports.onCreateNode = async ({
             store,
             cache,
             createNode,
-            createNodeId
+            createNodeId,
           })
         } catch (e) {
           console.error('gatsby-source-moltin: ERROR', e)
@@ -358,12 +379,12 @@ exports.onCreateNode = async ({
   ) {
     const getProductNodes = async () => {
       const productIds = node.relationships.products.data.map(
-        product => product.id
+        (product) => product.id
       )
 
       let productNodes = []
 
-      await productIds.forEach(async productId => {
+      await productIds.forEach(async (productId) => {
         const productNode = await getNode(productId)
 
         if (productNode) productNodes.push(productNode.id)
