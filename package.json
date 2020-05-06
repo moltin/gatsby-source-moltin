@@ -21,10 +21,24 @@
     "Jamie Barton <hi@jamiebarton.co.uk>",
     "Jonathan Steele <jonathan@steele.pro> (https://steele.pro)"
   ],
+  "scripts": {
+    "format": "prettier . --write"
+  },
   "devDependencies": {
+    "husky": ">=4",
+    "lint-staged": ">=10",
+    "prettier": "^2.0.5",
     "semantic-release": "15.14.0"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,css,md}": "prettier --write"
   }
 }
