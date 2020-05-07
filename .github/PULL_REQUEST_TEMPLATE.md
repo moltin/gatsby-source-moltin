@@ -1,39 +1,38 @@
 ## Type
 
-* ### Feature
+- ### Feature
   Implements a new feature
-* ### Fix
+- ### Fix
   Fixes a bug
-* ### Docs
+- ### Docs
   Documentation only changes
-* ### Style
+- ### Style
   Changes that **do not** affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
-* ### Refactor
+- ### Refactor
   A code change that neither fixes a bug nor adds a feature
-* ### Performance
+- ### Performance
   A code change that improves performance
-* ### Test
+- ### Test
   Adding missing or correcting existing tests
-* ### Chore
-  Changes to the build process or auxiliary tools and libraries such as documentation generation  
+- ### Chore
+  Changes to the build process or auxiliary tools and libraries such as documentation generation
 
 ## Description
 
-*A brief description of the goals of the pull request.*
+_A brief description of the goals of the pull request._
 
 ## Dependencies
 
-*Other PRs or builds that this PR depends on.*
+_Other PRs or builds that this PR depends on._
 
 ## Issues
 
-*A list of issues closed by this PR.*
+_A list of issues closed by this PR._
 
-* Fixes #
+- Fixes #
 
 ## Notes
 
-*Any additional notes.*
+_Any additional notes._
 
-
-*Please ensure commit messages follow [Angular commit conventions](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit)*
+_Please ensure commit messages follow [Angular commit conventions](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit)_
