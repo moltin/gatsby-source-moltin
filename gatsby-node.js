@@ -236,6 +236,7 @@ exports.sourceNodes = async (
       for (const product of productsArray) {
         const response = await moltin.get(`products/${product.id}`)
         const responseProduct = response.data
+
         responseProduct.relationships.children = product.relationships.children
         products.push(responseProduct)
       }
