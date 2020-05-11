@@ -235,7 +235,9 @@ exports.sourceNodes = async (
     try {
       for (const product of productsArray) {
         const response = await moltin.get(`products/${product.id}`)
-        products.push(response.data)
+        const responseProduct = response.data
+        responseProduct.relationships.children = product.relationships.children
+        products.push(responseProduct)
       }
     } catch (error) {
       console.error('gatsby-source-moltin: ERROR', error)
