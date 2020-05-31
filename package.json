@@ -25,9 +25,9 @@
     "format": "prettier . --write"
   },
   "devDependencies": {
-    "husky": ">=4",
-    "lint-staged": ">=10",
-    "prettier": "^2.0.5",
+    "husky": "4.2.5",
+    "lint-staged": "10.2.2",
+    "prettier": "2.0.5",
     "semantic-release": "15.14.0"
   },
   "publishConfig": {
