@@ -28,7 +28,7 @@
     "husky": ">=4",
     "lint-staged": ">=10",
     "prettier": "^2.0.5",
-    "semantic-release": "15.14.0"
+    "semantic-release": "17.2.3"
   },
   "publishConfig": {
     "access": "public"
